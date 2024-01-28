@@ -8,11 +8,10 @@
     - name: "Verify | kind | check cluster exist"
       become: true
       become_user: "{{ kind_user_owner }}"
-#      become_method: community.general.machinectl
-#      become_exe: "sudo machinectl"
-      ansible.builtin.shell: "kind get nodes --name {{ kind_cluster_name }}"
+      ansible.builtin.command: "kind get nodes --name {{ kind_cluster_name }}"
       register: __kind_cluster_exist
-      failed_when: __kind_cluster_exist.rc != 0
+      changed_when: __kind_cluster_exist.rc != 0
+
 
 - name: Verify uninstall
   hosts: all

@@ -30,7 +30,7 @@
   changed_when: __kind_systemd_modules_load.failed
 
 - name: "{{ kind_mode }} | kind | modules-load | verify the kernel modules load"
-  ansible.builtin.shell: lsmod|grep -E '^ip_tables|^ip6_tables'
+  ansible.builtin.command: lsmod|grep -E '^ip_tables|^ip6_tables'
   register: __kind_ip_table_module_loaded
   changed_when: __kind_ip_table_module_loaded.rc != 0
 
@@ -70,7 +70,7 @@
 - name: "{{ kind_node }} | kind | check cluster exist"
   become: true
   become_user: "{{ kind_user_owner }}"
-  ansible.builtin.shell: "kind get nodes --name {{ kind_cluster_name }}"
+  ansible.builtin.command: "kind get nodes --name {{ kind_cluster_name }}"
   register: __kind_cluster_exist
   changed_when: __kind_cluster_exist.rc != 0
 
@@ -78,10 +78,14 @@
   become: true
   become_user: "{{ kind_user_owner }}"
   when: __kind_cluster_exist.stdout_lines == 0
-  ansible.builtin.shell: "kind create cluster --name {{ kind_cluster_name }} --config cluster-config.yml"
+  ansible.builtin.command: "kind create cluster --name {{ kind_cluster_name }} --config cluster-config.yml"
+  register: __kind_create_kind_cluster
+  changed_when: __kind_create_kind_cluster.rc != 0
 
 - name: "{{ kind_mode }} | kind | delete kind cluster"
   become: true
   become_user: "{{ kind_user_owner }}"
   when: kind_state == 'absent'
-  ansible.builtin.shell: "kind delete cluster --name {{ kind_cluster_name }}"
+  ansible.builtin.command: "kind delete cluster --name {{ kind_cluster_name }}"
+  register: __kind_delete_kind_cluster
+  changed_when: __kind_delete_kind_cluster.rc != 0
