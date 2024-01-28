@@ -1,0 +1,23 @@
+---
+
+- name: Verify
+  hosts: all
+  vars_files:
+    - vars/kind.yml
+  tasks:
+    - name: "Verify | kind | check cluster exist"
+      become: true
+      become_user: "{{ kind_user_owner }}"
+      ansible.builtin.command: "kind get nodes --name {{ kind_cluster_name }}"
+      register: __kind_cluster_exist
+      changed_when: __kind_cluster_exist.rc != 0
+
+
+- name: Verify uninstall
+  hosts: all
+  vars:
+    kind_state: absent
+  tasks:
+    - name: Include buissetemmanuel.kind
+      ansible.builtin.include_role:
+        name: buissetemmanuel.kind

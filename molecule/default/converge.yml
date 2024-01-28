@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  vars_files:
+    - vars/kind.yml
+  tasks:
+    - name: Include buissetemmanuel.kind
+      ansible.builtin.include_role:
+        name: buissetemmanuel.kind
