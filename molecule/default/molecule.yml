@@ -1,0 +1,26 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+    type: libvirt
+platforms:
+  - name: molecule-kind-role-instance-1-fedora39
+    box: "fedora/39-cloud-base"
+    box_version: "39.20231031.1"
+    memory: 4096
+    cpus: 2
+    timezone: Europe/Zurich
+    groups:
+      - container
+provisioner:
+  name: ansible
+  log: true
+  config_options:
+    defaults:
+      timeout: 30
+      allow_world_readable_tmpfiles: true
+verifier:
+  name: ansible

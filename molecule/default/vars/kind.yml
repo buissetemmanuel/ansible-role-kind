@@ -1,0 +1,40 @@
+---
+
+# Manage users and groups
+users_managed: true
+users_groups:
+  - name: kind_user_group
+users_users:
+  - name: kind_user_owner
+    group: kind_user_group
+    create_home: true
+
+# Manage packages
+packages_managed: true
+
+# Manage systems
+systems_managed: true
+
+# state of kind - present=install - absent=uninstall
+kind_state: present
+
+kind_bin_dir: "/usr/local/bin"
+
+# k8s version
+kind_k8s_version: v1.29.1
+
+# kind version
+kind_version: v0.20.0
+
+# user owner/group of filesystem
+kind_user_owner: kind_user_owner
+kind_user_group: kind_user_group
+
+# name of cluster
+kind_cluster_name: "kind"
+
+# number of control pane
+kind_control_nodes: 3
+
+# number of worker
+kind_worker_nodes: 3

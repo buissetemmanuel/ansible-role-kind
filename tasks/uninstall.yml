@@ -1,0 +1,20 @@
+---
+
+- name: Uninstall (kind_mode fact)
+  ansible.builtin.set_fact:
+    kind_mode: "Uninstall"
+
+- name: "{{ kind_mode }} | kind"
+  ansible.builtin.include_tasks: kind.yml
+
+- name: "{{ kind_mode }} | systems"
+  when: systems_managed
+  ansible.builtin.include_tasks: systems.yml
+
+- name: "{{ kind_mode }} | users"
+  when: users_managed
+  ansible.builtin.include_tasks: users.yml
+
+- name: "{{ kind_mode }} | packages"
+  when: packages_managed
+  ansible.builtin.include_tasks: packages.yml

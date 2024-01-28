@@ -1,0 +1,47 @@
+---
+
+# Persistent DBUS session
+- name: "{{ kind_mode }} | systems | check if user is lingering"
+  become: true
+  ansible.builtin.stat:
+    path: "/var/lib/systemd/linger/{{ kind_user_owner }}"
+  register: user_owner_lingering
+
+- name: "{{ kind_mode }} | systems | enable lingering is needed"
+  when: not user_owner_lingering.stat.exists and kind_state == 'present'
+  become: true
+  ansible.builtin.command: "loginctl enable-linger {{ kind_user_owner }}"
+  register: __command_loginctl_enable_linger
+  changed_when: __command_loginctl_enable_linger.rc != 0
+
+- name: "{{ kind_mode }} | systems | disable lingering is needed"
+  when: kind_state == 'absent'
+  become: true
+  ansible.builtin.command: "loginctl disable-linger {{ kind_user_owner }}"
+  register: __command_loginctl_disable_linger
+  changed_when: __command_loginctl_disable_linger.rc != 0
+
+- name: "{{ kind_mode }} | systems | create /etc/systemd/system/user@.service.d folder"
+  become: true
+  ansible.builtin.file:
+    path: "/etc/systemd/system/user@.service.d"
+    state: "{{ kind_directories_state }}"
+    owner: root
+    group: root
+    mode: "{{ kind_files_mode }}"
+
+- name: "{{ kind_mode }} | systems | copy delegate.conf file"
+  when: kind_state == 'present'
+  become: true
+  ansible.builtin.copy:
+    src: delegate.conf
+    dest: "/etc/systemd/system/user@.service.d/delegate.conf"
+    owner: root
+    group: root
+    mode: "{{ kind_files_mode }}"
+
+- name: "{{ kind_mode }} | systems | daemon-reload"
+  when: kind_state == 'present'
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true

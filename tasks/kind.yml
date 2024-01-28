@@ -1,0 +1,87 @@
+---
+
+- name: "{{ kind_mode }} | kind | download and install K8S with checksum control"
+  become: true
+  when: not ansible_check_mode
+  ansible.builtin.get_url:
+    url: "{{ kind_k8s_download_url }}"
+    dest: "{{ kind_bin_dir }}/kubectl"
+    mode: "0755"
+    owner: root
+    group: root
+    checksum: "{{ kind_k8s_download_url_checksum }}"
+
+- name: "{{ kind_mode }} | kind | modules-load | copy iptables.conf file"
+  when: kind_state == 'present'
+  become: true
+  ansible.builtin.copy:
+    src: iptables.conf
+    dest: "/etc/modules-load.d/iptables.conf"
+    owner: root
+    group: root
+    mode: "{{ kind_files_mode }}"
+
+- name: "{{ kind_mode }} | kind | modules-load | restart service"
+  become: true
+  ansible.builtin.systemd:
+    name: "systemd-modules-load"
+    state: restarted
+  register: __kind_systemd_modules_load
+  changed_when: __kind_systemd_modules_load.failed
+
+- name: "{{ kind_mode }} | kind | modules-load | verify the kernel modules load"
+  ansible.builtin.shell: lsmod|grep -E '^ip_tables|^ip6_tables'
+  register: __kind_ip_table_module_loaded
+  changed_when: __kind_ip_table_module_loaded.rc != 0
+
+- name: "{{ kind_mode }} | kind | download and install KIND with checksum control"
+  become: true
+  when: not ansible_check_mode
+  ansible.builtin.get_url:
+    url: "{{ kind_download_url }}"
+    dest: "{{ kind_bin_dir }}/kind"
+    mode: "0755"
+    owner: root
+    group: root
+    checksum: "{{ kind_download_url_checksum }}"
+
+- name: "{{ kind_mode }} | kind | manage variable KIND_EXPERIMENTAL_PROVIDER=podman in ~/.bashrc.d/kind_experimental_provider.rc"
+  when:
+    - kind_state == 'present'
+    - user_owner_info is defined
+  become: true
+  ansible.builtin.copy:
+    dest: "{{ user_owner_info.home }}/.bashrc.d/kind_experimental_provider.rc"
+    content: "export KIND_EXPERIMENTAL_PROVIDER=podman"
+    owner: "{{ kind_user_owner }}"
+    group: "{{ kind_user_group }}"
+    mode: "{{ kind_files_mode }}"
+
+- name: "{{ kind_mode }} | kind | cluster config"
+  when: kind_state == 'present'
+  become: true
+  ansible.builtin.template:
+    src: cluster-config.yml.j2
+    dest: "{{ user_owner_info.home }}/cluster-config.yml"
+    mode: "{{ kind_files_mode }}"
+    owner: "{{ kind_user_owner }}"
+    group: "{{ kind_user_group }}"
+
+- name: "{{ kind_node }} | kind | check cluster exist"
+  become: true
+  become_user: "{{ kind_user_owner }}"
+  ansible.builtin.shell: "kind get nodes --name {{ kind_cluster_name }}"
+  register: __kind_cluster_exist
+  changed_when: __kind_cluster_exist.rc != 0
+
+- name: "{{ kind_mode }} | kind | create kind cluster"
+  become: true
+  become_user: "{{ kind_user_owner }}"
+  when: __kind_cluster_exist.stdout_lines == 0
+  ansible.builtin.shell: "kind create cluster --name {{ kind_cluster_name }} --config cluster-config.yml"
+
+- name: "{{ kind_mode }} | kind | delete kind cluster"
+  become: true
+  become_user: "{{ kind_user_owner }}"
+  when: kind_state == 'absent'
+  ansible.builtin.shell: "kind delete cluster --name {{ kind_cluster_name }}"

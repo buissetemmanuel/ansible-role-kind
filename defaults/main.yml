@@ -1,0 +1,50 @@
+---
+
+# Manage users and groups
+users_managed: false
+users_groups: []
+#  - name: kind
+#    state: present
+#    gid: 9999
+#    system: false
+users_users: []
+#  - name: kind
+#    state: present
+#    comment: Kind GEOCS Comment
+#    create_home: true
+#    uid: 8888
+#    group: kind
+#    groups: "kind,wheel"
+#    home: "/home"
+#    shell: "/bin/bash"
+#    system: false
+
+# Manage packages
+packages_managed: false
+
+# Manage systems
+systems_managed: false
+
+# state of kind - present=install - absent=uninstall
+kind_state: present
+
+kind_bin_dir: "/usr/local/bin"
+
+# k8s version
+kind_k8s_version: v1.29.1
+
+# kind version
+kind_version: v0.20.0
+
+# user owner/group of filesystem
+kind_user_owner: kind_user_owner
+kind_user_group: kind_user_group
+
+# name of cluster
+kind_cluster_name: "kind"
+
+# number of control pane
+kind_control_nodes: 1
+
+# number of worker
+kind_worker_nodes: 1

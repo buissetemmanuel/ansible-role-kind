@@ -1,0 +1,19 @@
+---
+
+kind_directories_state: "{{ 'directory' if kind_state == 'present' else 'absent' }}"
+kind_directories_mode: '0750'
+
+kind_files_state: "{{ 'file' if kind_state == 'present' else 'absent' }}"
+kind_files_mode: '0640'
+
+kind_packages_mandatories:
+  - systemd-container
+  - acl
+  - iptables-nft
+  - podman
+
+kind_k8s_download_url: "https://dl.k8s.io/release/{{ kind_k8s_version }}/bin/linux/amd64/kubectl"
+kind_k8s_download_url_checksum: "sha256:{{ kind_k8s_download_url }}.sha256"
+
+kind_download_url: "https://github.com/kubernetes-sigs/kind/releases/download/{{ kind_version }}/kind-linux-amd64"
+kind_download_url_checksum: "sha256:{{ kind_download_url }}.sha256sum"

@@ -1,0 +1,8 @@
+---
+
+- name: "{{ kind_mode }} | packages"
+  become: true
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: "{{ kind_state }}"
+  loop: "{{ kind_packages_mandatories }}"
